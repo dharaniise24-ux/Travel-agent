@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voyager // Autonomous Travel Concierge</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-sand: #f5f0ea;
+            --surface: #ffffff;
+            --terracotta: #d95d39;
+            --terracotta-dark: #b84322;
+            --terracotta-soft: #fbeee9;
+            --text-primary: #2b2623;
+            --text-secondary: #786f68;
+            --border-sand: #e6ded5;
+            --badge-green: #2a9d8f;
+            --badge-green-soft: #eaf6f4;
+            --danger: #dc2626;
+            --danger-soft: #fef2f2;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-sand);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .concierge-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            width: 100%;
+            max-width: 1100px;
+            height: 92vh;
+            background: var(--surface);
+            border-radius: 20px;
+            border: 1px solid var(--border-sand);
+            box-shadow: 0 16px 40px rgba(78, 62, 50, 0.08);
+            overflow: hidden;
+        }
+
+        /* Left Side: Agent Memory State */
+        .travel-panel {
+            background: #faf7f2;
+            padding: 24px 20px;
+            border-right: 1px solid var(--border-sand);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-icon {
+            background: var(--terracotta);
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .brand-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .agent-status-card {
+            background: var(--surface);
+            border: 1px solid var(--border-sand);
+            border-radius: 14px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .status-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-secondary);
+        }
+
+        .memory-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 6px 0;
+            border-bottom: 1px dashed #eee8e0;
+        }
+
+        .memory-label {
+            color: var(--text-secondary);
+        }
+
+        .memory-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .quick-actions {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .reset-btn {
+            background: transparent;
+            border: 1px solid var(--border-sand);
+            color: var(--text-secondary);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .reset-btn:hover {
+            border-color: var(--terracotta);
+            color: var(--terracotta);
+        }
+
+        /* Right Side: Chat Concierge */
+        .chat-section {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background: var(--surface);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-sand);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+        }
+
+        .agent-mode-pill {
+            font-size: 11.5px;
+            background: var(--badge-green-soft);
+            color: var(--badge-green);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .chat-feed {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            background: #fdfbf9;
+        }
+
+        .msg-row {
+            display: flex;
+            flex-direction: column;
+            max-width: 82%;
+        }
+
+        .msg-row.user {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .msg-row.agent {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        .msg-bubble {
+            padding: 14px 18px;
+            border-radius: 16px;
+            font-size: 13.5px;
+            line-height: 1.6;
+        }
+
+        .msg-row.user .msg-bubble {
+            background: var(--terracotta);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-row.agent .msg-bubble {
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid var(--border-sand);
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        /* Agent Observation / Reasoning Cards */
+        .reasoning-box {
+            background: #fdf6f0;
+            border: 1px solid #f3dacb;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 12px;
+            margin-bottom: 8px;
+            color: #8c4125;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .reasoning-label {
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Feasibility & Approval Cards */
+        .approval-card {
+            background: #fffdfa;
+            border: 2px solid var(--terracotta);
+            border-radius: 14px;
+            padding: 16px;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .approval-card.warning {
+            border-color: var(--danger);
+            background: var(--danger-soft);
+        }
+
+        .approval-card h4 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px;
+            color: var(--terracotta-dark);
+        }
+
+        .approval-card.warning h4 {
+            color: var(--danger);
+        }
+
+        .approval-btns {
+            display: flex;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .btn-approve {
+            background: var(--terracotta);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-approve:hover {
+            background: var(--terracotta-dark);
+        }
+
+        .btn-cancel {
+            background: #f3eee8;
+            color: var(--text-primary);
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* Suggestions Bar */
+        .suggestion-bar {
+            padding: 8px 20px;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            background: #ffffff;
+            border-top: 1px solid var(--border-sand);
+        }
+
+        .suggestion-chip {
+            background: #f7f3ec;
+            border: 1px solid var(--border-sand);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            white-space: nowrap;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        .suggestion-chip:hover {
+            background: var(--terracotta-soft);
+            border-color: var(--terracotta);
+            color: var(--terracotta-dark);
+        }
+
+        /* Input Bar */
+        .input-bar {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-sand);
+            display: flex;
+            gap: 10px;
+            background: white;
+        }
+
+        .travel-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--border-sand);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 13.5px;
+            outline: none;
+            background: #fcfaf7;
+        }
+
+        .travel-input:focus {
+            border-color: var(--terracotta);
+            background: white;
+        }
+
+        .btn-send {
+            background: var(--terracotta);
+            color: white;
+            border: none;
+            padding: 0 22px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-send:hover {
+            background: var(--terracotta-dark);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="concierge-layout">
+        <!-- Left: Agent Working Memory -->
+        <aside class="travel-panel">
+            <div class="brand">
+                <div class="brand-icon">✈</div>
+                <div>
+                    <div class="brand-title">Voyager</div>
+                    <div style="font-size: 11px; color: var(--text-secondary);">Autonomous Planner Agent</div>
+                </div>
+            </div>
+
+            <div class="agent-status-card">
+                <div class="status-title">🧠 Agent Working Memory</div>
+                <div class="memory-row">
+                    <span class="memory-label">Destination</span>
+                    <span class="memory-value" id="mem-dest">Not set</span>
+                </div>
+                <div class="memory-row">
+                    <span class="memory-label">Target Budget</span>
+                    <span class="memory-value" id="mem-budget">Flexible</span>
+                </div>
+                <div class="memory-row">
+                    <span class="memory-label">Duration</span>
+                    <span class="memory-value" id="mem-days">-</span>
+                </div>
+                <div class="memory-row">
+                    <span class="memory-label">Feasibility</span>
+                    <span class="memory-value" id="mem-feasibility">Analyzing</span>
+                </div>
+                <div class="memory-row">
+                    <span class="memory-label">Status</span>
+                    <span class="memory-value" style="color: var(--terracotta);" id="mem-gate">Idle</span>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <button class="reset-btn" onclick="sendSuggestion('reset plan')">🔄 Reset Agent Memory</button>
+            </div>
+        </aside>
+
+        <!-- Right: Chat Workspace -->
+        <main class="chat-section">
+            <header class="chat-header">
+                <div>
+                    <span style="font-size: 14px; font-weight: 700;">Trip Synthesis Stream</span>
+                    <span style="font-size: 12px; color: var(--text-secondary); margin-left: 8px;">ReAct Reasoning
+                        Loop</span>
+                </div>
+                <span class="agent-mode-pill">● System Active</span>
+            </header>
+
+            <section class="chat-feed" id="chat-feed">
+                <div class="msg-row agent">
+                    <div class="msg-bubble">
+                        Hello! 👋 I am <b>Voyager</b>.<br><br>
+                        Give me your destination, duration, and budget. I will run realistic transit and stay
+                        calculations, evaluate financial feasibility, and formulate a viable itinerary.
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick test scenarios -->
+            <div class="suggestion-bar">
+                <button class="suggestion-chip" onclick="sendSuggestion('Goa trip for 5days within 5000')">⚠️ Test
+                    Unfeasible: Goa 5d within 5000</button>
+                <button class="suggestion-chip" onclick="sendSuggestion('Darjeeling trip for 4days within 20000')">🏔️
+                    Darjeeling 4d within 20000</button>
+                <button class="suggestion-chip" onclick="sendSuggestion('Jaipur trip for 3days within 12000')">🏰 Jaipur
+                    3d within 12000</button>
+            </div>
+
+            <footer class="input-bar">
+                <input type="text" id="user-input" class="travel-input"
+                    placeholder="Where do you want to go and with what budget?..." onkeydown="handleKey(event)">
+                <button class="btn-send" onclick="sendMessage()">Send Directive</button>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        function renderMessage(htmlContent, type) {
+            const feed = document.getElementById("chat-feed");
+            const row = document.createElement("div");
+            row.className = `msg-row ${type}`;
+
+            const bubble = document.createElement("div");
+            bubble.className = "msg-bubble";
+            bubble.innerHTML = htmlContent;
+
+            row.appendChild(bubble);
+            feed.appendChild(row);
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        async function sendMessage(customText = null) {
+            const input = document.getElementById("user-input");
+            const msg = customText !== null ? customText : input.value.trim();
+            if (!msg) return;
+
+            renderMessage(msg, "user");
+            if (customText === null) input.value = "";
+
+            try {
+                const res = await fetch("/agent-chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: msg })
+                });
+                const data = await res.json();
+
+                let agentBubbleHTML = "";
+                if (data.reasoning_steps && data.reasoning_steps.length > 0) {
+                    data.reasoning_steps.forEach(step => {
+                        agentBubbleHTML += `
+                        <div class="reasoning-box">
+                            <span class="reasoning-label">⚡ ${step.tool}</span>
+                            <div>${step.observation}</div>
+                        </div>
+                    `;
+                    });
+                }
+
+                agentBubbleHTML += `<div>${data.response}</div>`;
+
+                if (data.requires_approval) {
+                    agentBubbleHTML += `
+                    <div class="approval-card">
+                        <h4>✋ Human Authorization Required</h4>
+                        <p style="font-size: 12px; color: #555;">
+                            Confirm reservation for <b>${data.destination}</b> at estimated total <b>${data.estimated_total}</b>?
+                        </p>
+                        <div class="approval-btns">
+                            <button class="btn-approve" onclick="approveAction('${data.destination}')">Authorize & Confirm</button>
+                            <button class="btn-cancel" onclick="sendSuggestion('modify plan')">Adjust Plan</button>
+                        </div>
+                    </div>
+                `;
+                }
+
+                renderMessage(agentBubbleHTML, "agent");
+
+                // Update Left Memory Panel
+                if (data.memory) {
+                    document.getElementById("mem-dest").textContent = data.memory.destination || "Not set";
+                    document.getElementById("mem-budget").textContent = data.memory.budget ? `₹${data.memory.budget.toLocaleString()}` : "Flexible";
+                    document.getElementById("mem-days").textContent = data.memory.days ? `${data.memory.days} Days` : "-";
+
+                    const feasEl = document.getElementById("mem-feasibility");
+                    if (data.is_feasible === false) {
+                        feasEl.textContent = "Unfeasible ❌";
+                        feasEl.style.color = "#dc2626";
+                    } else if (data.is_feasible === true) {
+                        feasEl.textContent = "Feasible ✅";
+                        feasEl.style.color = "#2a9d8f";
+                    } else {
+                        feasEl.textContent = "Analyzing";
+                        feasEl.style.color = "var(--text-primary)";
+                    }
+
+                    const gateEl = document.getElementById("mem-gate");
+                    if (data.is_feasible === false) {
+                        gateEl.textContent = "Unapproved / Deficit ⚠️";
+                        gateEl.style.color = "#dc2626";
+                    } else if (data.memory.authorized) {
+                        gateEl.textContent = "Booked 🎉";
+                        gateEl.style.color = "#2a9d8f";
+                    } else if (data.requires_approval) {
+                        gateEl.textContent = "Awaiting Auth ⏳";
+                        gateEl.style.color = "var(--terracotta)";
+                    } else {
+                        gateEl.textContent = "Ready";
+                        gateEl.style.color = "var(--text-primary)";
+                    }
+                }
+
+            } catch (err) {
+                renderMessage("⚠️ Connection error with Flask server.", "agent");
+            }
+        }
+
+        function sendSuggestion(text) {
+            sendMessage(text);
+        }
+
+        function approveAction(dest) {
+            sendMessage(`APPROVED: Confirm booking for ${dest}`);
+        }
+
+        function handleKey(e) {
+            if (e.key === "Enter") {
+                sendMessage();
+            }
+        }
+    </script>
+
+</body>
+
+</html>
